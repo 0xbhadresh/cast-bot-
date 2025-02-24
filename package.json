@@ -1,0 +1,31 @@
+{
+  "name": "server",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/bun": "latest",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.5",
+    "@types/node-fetch": "^2.6.12",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "ts-node --esm index.ts"
+  },
+  "dependencies": {
+    "@neynar/nodejs-sdk": "^2.3.0",
+    "body-parser": "^1.20.3",
+    "canvas": "^3.1.0",
+    "cloudinary": "^2.5.1",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4",
+    "express": "^4.21.2"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
