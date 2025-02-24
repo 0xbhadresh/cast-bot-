@@ -4,12 +4,15 @@
     {
       "src": "index.ts",
       "use": "@vercel/node"
+    },
+    {
+      "src": "Earnkit.json",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "EarnkitToken.json",
+      "use": "@vercel/static"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "index.ts"
-    }
-  ]
+  "includeFiles": ["Earnkit.json", "EarnkitToken.json"]
 }

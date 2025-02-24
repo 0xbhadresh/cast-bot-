@@ -5,7 +5,7 @@ import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import { ethers } from "ethers";
 import EarnkitABI from "./Earnkit.json";
 import EarnkitToken from "./EarnkitToken.json";
-import uploadToCloudinary from "./cloudinearyHook";
+import uploadToCloudinary from "./cloudineary";
 import {
   triggerFollowAirdrop,
   triggerYapAirdrop,

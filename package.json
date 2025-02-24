@@ -16,7 +16,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "ts-node --esm index.ts"
+    "start": "tsx index.ts"
   },
   "dependencies": {
     "@neynar/nodejs-sdk": "^2.3.0",
