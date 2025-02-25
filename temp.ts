@@ -1,18 +1,23 @@
 import { createCanvas, loadImage } from "canvas";
 import { writeFileSync } from "fs";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import express from "express";
+import bodyParser from "body-parser";
+import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+dotenv.config();
 
 import { ethers } from "ethers";
 import EarnkitABI from "./src/Earnkit.json";
 import EarnkitToken from "./src/EarnkitToken.json";
-import uploadToCloudinary from "./src/cloudineary";
+// import uploadToCloudinary from "./cloudinearyHook";
 import {
   triggerFollowAirdrop,
   triggerYapAirdrop,
   registerToken,
   replyNeynarCast,
 } from "./src/coinviseApis";
-
+import axios from "axios";
 const PROVIDER_URL = process.env.MAINNET_PROVIDER_URL;
 const PRIVATE_KEY = process.env.TOKEN_BOT_PRIVATE_KEY;
 const EARNKIT_CONTRACT = "0xDF29E0CE7fE906065608fef642dA4Dc4169f924b";
@@ -41,6 +46,25 @@ function getCreationCode(): string {
   return typeof EarnkitToken.bytecode === "string"
     ? EarnkitToken.bytecode
     : EarnkitToken.bytecode.object;
+}
+cloudinary.config({
+  cloud_name: "dcbgnwitt",
+  api_key: "798182692117724",
+  api_secret: "20VleMPq8RQcI1Po67a1vYlIlrc",
+});
+
+// Function to upload image to Cloudinary
+export default async function uploadToCloudinary(imagePath: string) {
+  try {
+    const result = await cloudinary.uploader.upload(imagePath, {
+      folder: "Casts",
+    });
+    console.log("Image uploaded to Cloudinary:", result.secure_url);
+    return result.secure_url;
+  } catch (error) {
+    console.error("Error uploading image to Cloudinary:", error);
+    throw error;
+  }
 }
 
 async function generateSaltForAddress(
@@ -129,17 +153,24 @@ async function generateSaltForAddress(
   }
 }
 
+const app = express();
+app.use(bodyParser.json());
+const PORT = 3002;
+
 // Initialize Bun server
-const server = Bun.serve({
-  port: 3002,
-  async fetch(req) {
-    try {
-      if (req.method === "POST") {
-        const body = await req.text();
-        const hookData = JSON.parse(body);
+app.post("/", async (req, res) => {
+  try {
+    const hookData = req.body;
+    console.log("Webhook Event Received:", hookData);
+    if (req.method === "POST") {
+      const hookData = req.body;
 
-        console.log("Webhook Event Received:", hookData);
+      console.log("Webhook Event Received:", hookData);
 
+      if (
+        hookData.data.text.includes("tokenize") ||
+        hookData.data.text.includes("tokenise")
+      ) {
         // Extract cast data
         const authorUsername = hookData.data.author.username || "unknown";
         const displayName = hookData.data.author.display_name || "User";
@@ -268,9 +299,8 @@ const server = Bun.serve({
 
         if (filteredLogs.length === 0) {
           console.log("No logs found with the specified topic.");
-          return new Response("No logs found with the specified topic.", {
-            status: 200,
-          });
+          res.status(200).send("No logs found with the specified topic.");
+          return;
         }
         const campaignIds = filteredLogs.map((log: { topics: string[] }) =>
           parseInt(log.topics[2], 16)
@@ -278,9 +308,8 @@ const server = Bun.serve({
 
         if (campaignIds.length < 2) {
           console.error("Insufficient campaign IDs found");
-          return new Response("Insufficient campaign IDs found", {
-            status: 200,
-          });
+          res.status(200).send("Insufficient campaign IDs found");
+          return;
         }
         const filteredLog: any = receipt.logs.find(
           (log: { address: string }) =>
@@ -325,8 +354,8 @@ const server = Bun.serve({
         );
         console.log(yapSlug);
 
-        const message = `🚨 Token Created: ${tokenName}.
-        \n\nToken address: ${tokenAddress}\n\nView on Coinvise:https://coinvise.ai/token/${tokenAddress}\n\n${tokenName} airdrops are now claimable below in this thread!`;
+        const message = `🚨 Your cast is now tokenized we deployed the token: ${tokenName}.
+      \n\nToken address: https://basescan.org/address/${tokenAddress}\n\nView on Coinvise:https://coinvise.ai/token/${tokenAddress}\n\n${tokenName} airdrops are now claimable below in this thread!`;
 
         const tokenFrame = `https://frames.coinvise.ai/token/${tokenAddress}`;
 
@@ -346,7 +375,7 @@ const server = Bun.serve({
           yapLink
         );
 
-        const followCampaignMsg = `🪂 Airdrop #2: Follow @coinvise, @earnkit and recast the main post in this thread to be eligible to claim.`;
+        const followCampaignMsg = `🪂 Airdrop #2: Follow and recast the main post in this thread to be eligible to claim.`;
         const followLink = `https://frames.coinvise.ai/claim/${followCampaignId}/${followSlug}`;
 
         const followCastHash = await replyNeynarCast(
@@ -357,26 +386,21 @@ const server = Bun.serve({
 
         console.log("All casts done:", followCastHash);
 
-        // If cast mentions "0xdeepak", create a frame
-        // if (castText.includes("0xdeepak")) {
-        //   const generateImage = await generateTweetImage(castData);
-        //   console.log("Image generated:", generateImage);
-        // }
-
-        return new Response("Webhook received! Image generated.", {
-          status: 200,
-        });
+        res.status(200).send("Webhook received! Image generated.");
+        return;
       }
-
-      return new Response("Method Not Allowed", { status: 405 });
-    } catch (e: any) {
-      console.error("Error processing webhook:", e.message);
-      return new Response("Internal Server Error", { status: 500 });
     }
-  },
-});
 
-console.log(`Listening on localhost:${server.port}`);
+    res.status(405).send("Method Not Allowed");
+  } catch (e: any) {
+    console.error("Error processing webhook:", e.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
+app.listen(3002, () => {
+  console.log("Server is running on port 3002");
+});
+// console.log(`Listening on localhost:${server.port}`);
 
 // Function to generate the tweet-like image
 async function generateTweetImage(data: {

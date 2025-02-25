@@ -16,7 +16,8 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "tsx index.ts"
+    "start": "tsx index.ts",
+    "dev":  " tsx server"
   },
   "dependencies": {
     "@neynar/nodejs-sdk": "^2.3.0",
