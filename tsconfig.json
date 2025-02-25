@@ -14,7 +14,10 @@
     "inlineSourceMap": true,
     "resolveJsonModule": true
   },
+
   "ts-node": {
     "esm": true
-  }
+  },
+  "exclude": ["dist"],
+  "include": ["src/**/*.json", "src/**/*.ts"]
 }

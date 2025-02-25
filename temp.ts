@@ -3,15 +3,15 @@ import { writeFileSync } from "fs";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
 import { ethers } from "ethers";
-import EarnkitABI from "./Earnkit.json";
-import EarnkitToken from "./EarnkitToken.json";
-import uploadToCloudinary from "./cloudineary";
+import EarnkitABI from "./src/Earnkit.json";
+import EarnkitToken from "./src/EarnkitToken.json";
+import uploadToCloudinary from "./src/cloudineary";
 import {
   triggerFollowAirdrop,
   triggerYapAirdrop,
   registerToken,
   replyNeynarCast,
-} from "./coinviseApis";
+} from "./src/coinviseApis";
 
 const PROVIDER_URL = process.env.MAINNET_PROVIDER_URL;
 const PRIVATE_KEY = process.env.TOKEN_BOT_PRIVATE_KEY;
